@@ -23,6 +23,9 @@ Accessed from browser at `localhost:5000`.
 
 ## Start
 
+Put `fr-subset.geojsons` into `data/` folder.
+
+Then start containers with docker compose:
 ```commandline
 docker-compose up
 ```
