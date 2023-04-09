@@ -1,0 +1,14 @@
+FROM python:3.8-bullseye
+
+# add source code
+ADD src/ /src
+ADD requirements.txt .
+
+# install deps
+RUN pip install -U pip && pip install -r requirements.txt
+
+WORKDIR /src
+EXPOSE 5000
+
+# run API
+CMD ["python", "app.py"]
