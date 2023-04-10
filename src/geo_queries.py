@@ -1,11 +1,13 @@
 from typing import Tuple
 
+import geojson
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
 from sqlalchemy import label
 from sqlalchemy.types import DOUBLE_PRECISION
 from geoalchemy2.types import Geometry
+from shapely.geometry import shape
 
 from config import DB_HOST, DB_NAME, DB_PASSWORD, DB_USER
 from db import models
@@ -64,6 +66,8 @@ class GeoQueries:
             return self.get_fields(query)
 
     def get_inside(self, geojson_geom: str):
+        wkt_geom = shape(geojson.loads(geojson_geom)).wkt
+
         with self.session_maker() as db_session:
             query = db_session.query(
                 func.ST_AsGeoJSON(models.Fields.wkb_geometry).label("geometry"),
@@ -74,17 +78,16 @@ class GeoQueries:
                 models.Fields.region
             ).filter(
                 func.ST_Covers(
-                    func.ST_Transform(func.cast(func.concat(
-                        'SRID=4326;',
-                        func.ST_AsText(func.ST_TRANSFORM(func.ST_GeomFromGeoJSON(geojson_geom), 4326), 3857)
-                    ), Geometry), 3857),
-                    func.ST_Transform(models.Fields.wkb_geometry, 3857)
+                    func.cast(f'SRID=4326;{wkt_geom}', Geometry),
+                    models.Fields.wkb_geometry
                 ).is_(True)
             )
 
             return self.get_fields(query)
 
     def get_intersect(self, geojson_geom: str):
+        wkt_geom = shape(geojson.loads(geojson_geom)).wkt
+
         with self.session_maker() as db_session:
             query = db_session.query(
                 func.ST_AsGeoJSON(models.Fields.wkb_geometry).label("geometry"),
@@ -95,11 +98,8 @@ class GeoQueries:
                 models.Fields.region
             ).filter(
                 func.ST_Intersects(
-                    func.ST_Transform(func.cast(func.concat(
-                        'SRID=4326;',
-                        func.ST_AsText(func.ST_TRANSFORM(func.ST_GeomFromGeoJSON(geojson_geom), 4326), 3857)
-                    ), Geometry), 3857),
-                    func.ST_Transform(models.Fields.wkb_geometry, 3857)
+                    func.cast(f'SRID=4326;{wkt_geom}', Geometry),
+                    models.Fields.wkb_geometry
                 ).is_(True)
             )
 
