@@ -47,10 +47,6 @@ class GeoQueries:
     def get_nearest(self, distance: int, point: Tuple[float, float]):
         with self.session_maker() as db_session:
             query = db_session.query(
-                label("distance", func.ST_Distance(
-                    func.ST_Transform(models.Fields.wkb_geometry, 3857),
-                    func.ST_Transform(func.cast(f'SRID=4326;POINT({point[0]} {point[1]})', Geometry), 3857)
-                )),
                 func.ST_AsGeoJSON(models.Fields.wkb_geometry).label("geometry"),
                 models.Fields.id,
                 models.Fields.crop,
@@ -58,10 +54,11 @@ class GeoQueries:
                 func.cast(models.Fields.area_ha, DOUBLE_PRECISION).label("area_ha"),
                 models.Fields.region
             ).filter(
-                func.ST_Distance(
+                func.ST_DWithin(
                     func.ST_Transform(models.Fields.wkb_geometry, 3857),
-                    func.ST_Transform(func.cast(f'SRID=4326;POINT({point[0]} {point[1]})', Geometry), 3857)
-                ) <= distance
+                    func.ST_Transform(func.cast(f'SRID=4326;POINT({point[0]} {point[1]})', Geometry), 3857),
+                    distance
+                ).is_(True)
             )
 
             return self.get_fields(query)
