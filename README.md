@@ -1,3 +1,13 @@
+## Start
+
+Put dataset into data/ folder before starting compose.
+
+```commandline
+docker-compose up
+```
+
+It will start postgis container, initialize db with fr subset data and start web app container.
+
 ## API
 
 Provides 4 REST enpoints:
@@ -20,14 +30,3 @@ Provides 4 REST enpoints:
  ```
 
 Accessed from browser at `localhost:5000`.
-
-## Start
-
-Put `fr-subset.geojsons` into `data/` folder.
-
-Then start containers with docker compose:
-```commandline
-docker-compose up
-```
-
-It will start postgis, initialize db with fr subset data and start web app.
