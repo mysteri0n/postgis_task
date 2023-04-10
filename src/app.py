@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from werkzeug.exceptions import BadRequest
 
-from geo_queries import GeoQueries
+from geo_queries import GeoQueries, TooManyResultsError
 
 app = Flask(__name__)
 api = Api(app)
@@ -26,7 +27,10 @@ class GetNearest(Resource):
         args = parser.parse_args(strict=False)
 
         q = GeoQueries()
-        fields = q.get_nearest(args.distance, (args.lon, args.lat))
+        try:
+            fields = q.get_nearest(args.distance, (args.lon, args.lat))
+        except TooManyResultsError:
+            raise BadRequest("Response contains more than 10 000 items")
         return fields
 
 
@@ -43,7 +47,10 @@ class GetInside(Resource):
         args = parser.parse_args(strict=False)
 
         q = GeoQueries()
-        fields = q.get_inside(args.geometry)
+        try:
+            fields = q.get_inside(args.geometry)
+        except TooManyResultsError:
+            raise BadRequest("Response contains more than 10 000 items")
         return fields
 
 
@@ -59,7 +66,10 @@ class GetIntersect(Resource):
         args = parser.parse_args(strict=False)
 
         q = GeoQueries()
-        fields = q.get_intersect(args.geometry)
+        try:
+            fields = q.get_intersect(args.geometry)
+        except TooManyResultsError:
+            raise BadRequest("Response contains more than 10 000 items")
         return fields
 
 
@@ -76,6 +86,7 @@ class RegionStat(Resource):
 
         q = GeoQueries()
         stat = q.get_stat_by_region(args.region)
+
         return stat
 
 
