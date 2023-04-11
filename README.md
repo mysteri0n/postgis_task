@@ -30,3 +30,20 @@ Provides 4 REST enpoints:
  ```
 
 Accessed from browser at `localhost:5000`.
+
+## Performance
+
+In general possible performance improvements depends on data access patterns.
+
+Possible options (at low level):
+1. Add spatial indexes for geometry column (this already is done)
+2. Add B-tree or other index for region column for `/region_stat` endpoint.
+
+At high level:
+1. Add partitioning by date/year for instance to store historical data separately from active one (what kind of history will be stored?). 
+   Add partitioning by country if data accessed on country basis.
+2. PostgreSQL configuration tuning as [described](https://postgis.net/docs/manual-3.0/performance_tips.html#database_tuning_configuration).
+3. Use PostgreSQL sharding to store data accessed separately in different shards (horizontal scaling).
+4. Store preaggregated data in separate tables or storage and recalculate it periodically using separate process.
+5. Use caching. There is caching on DB level and additional layer of caching could be implemented in Redis.
+6. Use replication: use read replicas of DB to access read-only copy of data decreasing load on main server.
