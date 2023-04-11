@@ -6,7 +6,7 @@ Put dataset into data/ folder before starting compose.
 docker-compose up
 ```
 
-It will start postgis container, initialize db with fr subset data and start web app container.
+It will build+start postgis container, initialize db with fr subset data and build+start web app container.
 
 ## API
 
